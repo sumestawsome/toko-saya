@@ -17,7 +17,7 @@ export default function MainLayout() {
                     <p className="flex items-center gap-1 flex-wrap justify-center sm:justify-end">
                         <span>Dibuat dengan ❤️ oleh</span>
                         <a
-                            href="https://sumestawesome.pages.dev"
+                            href="https://sumestawsome.pages.dev"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="font-semibold text-slate-700 hover:text-indigo-600 underline underline-offset-2 transition-colors ml-0.5"
@@ -26,12 +26,12 @@ export default function MainLayout() {
                         </a>
                         <span className="text-slate-400 mx-1">•</span>
                         <a
-                            href="https://sumestawesome.pages.dev"
+                            href="https://sumestawsome.pages.dev"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-slate-500 hover:text-indigo-600 underline underline-offset-2 transition-colors"
                         >
-                            sumestawesome.pages.dev
+                            sumestawsome.pages.dev
                         </a>
                     </p>
                 </div>
