@@ -5,24 +5,24 @@ import { useCart } from "../../utils/CartContext";
 export default function Cart() {
     const { cart, removeFromCart, updateQty, clearCart, totalQty, totalPrice } = useCart();
 
-    // State Modal Konfirmasi Hapus
+    // State modal konfirmasi hapus
     const [confirmModal, setConfirmModal] = useState({
         isOpen: false,
         type: null, // 'single' | 'clear_all'
         item: null,
     });
 
-    // Helper untuk memformat angka ke mata uang Rupiah
+    // Helper format mata uang Rupiah
     const formatRupiah = (amount) => {
         return "Rp" + (amount || 0).toLocaleString("id-ID");
     };
 
-    // Handler menutup modal
+    // Tutup dialog modal
     const handleCloseModal = () => {
         setConfirmModal({ isOpen: false, type: null, item: null });
     };
 
-    // Handler konfirmasi eksekusi hapus
+    // Eksekusi aksi konfirmasi hapus
     const handleConfirmAction = () => {
         if (confirmModal.type === "single" && confirmModal.item) {
             removeFromCart(confirmModal.item.id);
@@ -32,12 +32,11 @@ export default function Cart() {
         handleCloseModal();
     };
 
-    // Kondisi 1: Keranjang Kosong (Empty State)
+    // Tampilan ketika keranjang belanja masih kosong
     if (!cart || cart.length === 0) {
         return (
             <div className="py-12">
                 <div className="bg-white rounded-none border border-slate-200 p-10 sm:p-12 text-center max-w-lg mx-auto shadow-sm">
-                    {/* Ikon SVG Keranjang Kosong */}
                     <div className="flex justify-center mb-5">
                         <div className="w-20 h-20 bg-slate-50 border border-slate-200 flex items-center justify-center rounded-none text-slate-400">
                             <svg
@@ -87,10 +86,10 @@ export default function Cart() {
         );
     }
 
-    // Kondisi 2: Keranjang Berisi Produk
+    // Tampilan daftar barang di keranjang belanja
     return (
         <div className="py-4 sm:py-6 relative">
-            {/* Header Halaman */}
+            {/* Header halaman */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-slate-200 gap-3">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
@@ -100,7 +99,7 @@ export default function Cart() {
                         Kelola barang belanjaan Anda sebelum melanjutkan ke proses checkout.
                     </p>
                 </div>
-                {/* Tombol Buka Modal Kosongkan Keranjang */}
+                {/* Tombol kosongkan keranjang */}
                 <button
                     type="button"
                     onClick={() => setConfirmModal({ isOpen: true, type: "clear_all", item: null })}
@@ -123,16 +122,16 @@ export default function Cart() {
                 </button>
             </div>
 
-            {/* Layout 2 Kolom */}
+            {/* Konten 2 kolom keranjang belanja */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                {/* Kolom Kiri: Daftar Item Keranjang */}
+                {/* Daftar item keranjang */}
                 <div className="lg:col-span-2 space-y-3.5">
                     {cart.map((item) => (
                         <div
                             key={item.id}
                             className="bg-white border border-slate-200 p-4 rounded-none flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm"
                         >
-                            {/* Bagian Kiri: Foto & Info Produk */}
+                            {/* Informasi produk */}
                             <div className="flex items-center gap-3.5 w-full sm:w-auto flex-1 min-w-0">
                                 <div className="w-20 h-20 sm:w-24 sm:h-24 aspect-square bg-[#cbe3f7] rounded-none overflow-hidden shrink-0 border border-slate-200">
                                     <img
@@ -162,9 +161,8 @@ export default function Cart() {
                                 </div>
                             </div>
 
-                            {/* Bagian Kanan: Kontrol Kuantitas, Subtotal, & Tombol Hapus */}
+                            {/* Kontrol kuantitas, subtotal, & tombol hapus */}
                             <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                                {/* Pengatur Kuantitas (Quantity Controller) */}
                                 <div className="flex items-center border border-slate-300 rounded-none bg-white">
                                     <button
                                         type="button"
@@ -209,7 +207,6 @@ export default function Cart() {
                                     </button>
                                 </div>
 
-                                {/* Subtotal per Item */}
                                 <div className="text-right min-w-[95px]">
                                     <p className="text-[11px] text-slate-400 font-medium">Subtotal</p>
                                     <p className="text-sm sm:text-base font-extrabold text-slate-900 leading-tight">
@@ -217,7 +214,6 @@ export default function Cart() {
                                     </p>
                                 </div>
 
-                                {/* Tombol Buka Modal Hapus Item Tertentu */}
                                 <button
                                     type="button"
                                     onClick={() => setConfirmModal({ isOpen: true, type: "single", item })}
@@ -244,7 +240,7 @@ export default function Cart() {
                     ))}
                 </div>
 
-                {/* Kolom Kanan: Ringkasan Pesanan */}
+                {/* Ringkasan pesanan */}
                 <div className="lg:col-span-1">
                     <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm lg:sticky lg:top-24">
                         <h2 className="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">
@@ -310,9 +306,7 @@ export default function Cart() {
                 </div>
             </div>
 
-            {/* ======================================================== */}
-            {/* MODAL POP-UP KONFIRMASI HAPUS INTERAKTIF (SHARP EDGES) */}
-            {/* ======================================================== */}
+            {/* Modal konfirmasi hapus */}
             {confirmModal.isOpen && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
@@ -320,12 +314,11 @@ export default function Cart() {
                     role="dialog"
                     aria-modal="true"
                 >
-                    {/* Dialog Card Kotak Tegas */}
                     <div
                         className="bg-white border border-slate-200 p-6 sm:p-8 max-w-md w-full shadow-2xl rounded-none relative animate-in zoom-in-95 duration-150"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Tombol Silang Tutup Mini (✕) di Sudut Kanan Atas */}
+                        {/* Tombol tutup modal */}
                         <button
                             type="button"
                             onClick={handleCloseModal}
@@ -343,7 +336,7 @@ export default function Cart() {
                             </svg>
                         </button>
 
-                        {/* Kotak Ikon Peringatan SVG Kotak Tegas */}
+                        {/* Ikon peringatan */}
                         <div className="w-12 h-12 bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center rounded-none mb-4 shadow-xs">
                             <svg
                                 className="w-6 h-6 text-rose-600"
@@ -360,7 +353,7 @@ export default function Cart() {
                             </svg>
                         </div>
 
-                        {/* Teks Dialog Dinamis Sesuai Tipe Aksi */}
+                        {/* Keterangan konfirmasi */}
                         <div className="space-y-2">
                             <h3 className="text-lg font-bold text-slate-900 leading-snug">
                                 {confirmModal.type === "clear_all"
@@ -382,9 +375,8 @@ export default function Cart() {
                             </p>
                         </div>
 
-                        {/* Dua Tombol Aksi Sejajar Kotak Tegas */}
+                        {/* Tombol aksi konfirmasi */}
                         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 mt-6 pt-3 border-t border-slate-100">
-                            {/* Tombol Batal */}
                             <button
                                 type="button"
                                 onClick={handleCloseModal}
@@ -393,7 +385,6 @@ export default function Cart() {
                                 Batal
                             </button>
 
-                            {/* Tombol Konfirmasi Hapus */}
                             <button
                                 type="button"
                                 onClick={handleConfirmAction}

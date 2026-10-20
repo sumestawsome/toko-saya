@@ -3,64 +3,115 @@ import { createContext, useContext, useState } from "react";
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-    // Inisialisasi state user dari localStorage
-    const [user, setUser] = useState(() => {
-        try {
-            const savedUser = localStorage.getItem("toko_user");
-            return savedUser ? JSON.parse(savedUser) : null;
-        } catch {
-            return null;
-        }
-    });
+  // Membaca status login yang tersimpan di browser
+  const [user, setUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem("toko_user");
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
 
-    // Fungsi login dengan validasi kredensial administrator
-    const login = (email, password) => {
-        const cleanEmail = (email || "").trim().toLowerCase();
-        const cleanPassword = (password || "").trim();
+  // Fungsi Login yang langsung bertanya ke server Laravel
+  const login = async (email, password) => {
+    const cleanEmail = (email || "").trim().toLowerCase();
+    const cleanPassword = (password || "").trim();
 
-        if (cleanEmail === "admin@gmail.com" && cleanPassword === "admin12345") {
-            const userData = {
-                email: "admin@gmail.com",
-                role: "admin",
-                name: "Administrator",
-            };
-            setUser(userData);
-            try {
-                localStorage.setItem("toko_user", JSON.stringify(userData));
-            } catch (error) {
-                console.error("Gagal menyimpan sesi user ke localStorage:", error);
-            }
-            return { success: true, user: userData };
-        }
+    try {
+      const res = await fetch("http://localhost:8000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          email: cleanEmail,
+          password: cleanPassword,
+        }),
+      });
 
-        return {
-            success: false,
-            message: "Email atau password yang Anda masukkan salah.",
+      const data = await res.json();
+
+      // Jika email & password cocok di database Laravel
+      if (res.ok && data.token) {
+        const userData = {
+          email: cleanEmail,
+          role: "admin",
+          name: data.user?.name || "Administrator",
+          token: data.token, // Menyimpan tiket token Sanctum
         };
-    };
 
-    // Fungsi logout untuk menghapus sesi pengguna
-    const logout = () => {
-        try {
-            localStorage.removeItem("toko_user");
-        } catch (error) {
-            console.error("Gagal menghapus sesi user dari localStorage:", error);
-        }
-        setUser(null);
-    };
+        setUser(userData);
+        localStorage.setItem("toko_user", JSON.stringify(userData));
+        return { success: true, user: userData };
+      }
 
-    return (
-        <AuthContext.Provider value={{ user, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+      // Jika server menolak (misal password salah)
+      return {
+        success: false,
+        message:
+          data.message || "Email atau kata sandi tidak cocok di database.",
+      };
+    } catch (error) {
+      console.error("Gagal terhubung ke server login:", error);
+
+      // Jalur darurat lokal (jika sewaktu-waktu server Laravel belum dinyalakan)
+      if (cleanEmail === "admin@gmail.com" && cleanPassword === "admin12345") {
+        const fallbackUser = {
+          email: "admin@gmail.com",
+          role: "admin",
+          name: "Administrator (Mode Offline)",
+        };
+        setUser(fallbackUser);
+        localStorage.setItem("toko_user", JSON.stringify(fallbackUser));
+        return { success: true, user: fallbackUser };
+      }
+
+      return {
+        success: false,
+        message:
+          "Tidak dapat menghubungi server. Pastikan 'php artisan serve' sedang aktif.",
+      };
+    }
+  };
+
+  // Fungsi Logout
+  const logout = async () => {
+    // Hapus token di backend jika ada koneksi
+    if (user?.token) {
+      try {
+        await fetch("http://localhost:8000/api/logout", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            Accept: "application/json",
+          },
+        });
+      } catch (err) {
+        console.error("Gagal logout di server:", err);
+      }
+    }
+
+    try {
+      localStorage.removeItem("toko_user");
+    } catch (error) {
+      console.error("Gagal menghapus sesi login:", error);
+    }
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-// Hook helper untuk mempermudah konsumsi context
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth harus digunakan di dalam AuthProvider");
+  }
+  return context;
 }

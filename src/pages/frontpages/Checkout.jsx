@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useCart } from "../../utils/CartContext";
 
 export default function Checkout() {
     const { cart, totalPrice, totalQty, clearCart } = useCart();
-    const navigate = useNavigate();
 
-    // State Formulir Pengiriman
+    // State formulir data pengiriman
     const [formData, setFormData] = useState({
         name: "",
         phone: "",
@@ -15,11 +14,11 @@ export default function Checkout() {
         postalCode: "",
     });
 
-    // State Pilihan Pengiriman & Pembayaran
+    // State opsi pengiriman dan metode pembayaran
     const [shippingOption, setShippingOption] = useState("regular"); // "regular" | "express"
     const [paymentMethod, setPaymentMethod] = useState("qris"); // "qris" | "bank" | "cod"
 
-    // State Validasi & Sukses Pesanan
+    // State validasi dan status pesanan
     const [errorMsg, setErrorMsg] = useState("");
     const [isOrderSuccess, setIsOrderSuccess] = useState(false);
     const [orderCode, setOrderCode] = useState("");
@@ -28,12 +27,12 @@ export default function Checkout() {
         qty: 0,
     });
 
-    // Helper format Rupiah
+    // Helper format mata uang Rupiah
     const formatRupiah = (amount) => {
         return "Rp" + (amount || 0).toLocaleString("id-ID");
     };
 
-    // Ongkos kirim berdasarkan opsi
+    // Kalkulasi ongkos kirim dan total bayar
     const shippingCost = shippingOption === "express" ? 20000 : 0;
     const grandTotal = totalPrice + shippingCost;
 
@@ -43,11 +42,11 @@ export default function Checkout() {
         if (errorMsg) setErrorMsg("");
     };
 
-    // Handle Submit Checkout
+    // Submit pemesanan, buat nomor invoice, dan arsipkan ke localStorage
     const handleSubmitOrder = (e) => {
         e.preventDefault();
 
-        // Validasi Sederhana
+        // Validasi kolom formulir wajib
         if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim() || !formData.city.trim()) {
             setErrorMsg("Harap lengkapi semua data informasi pengiriman yang bertanda bintang (*).");
             return;
@@ -59,12 +58,12 @@ export default function Checkout() {
             qty: totalQty,
         });
 
-        // Generate Kode Pesanan Unik (#INV-2026-XXXX)
+        // Generate nomor nota / pesanan unik
         const randomNum = Math.floor(1000 + Math.random() * 9000);
         const code = `#INV-2026-${randomNum}`;
         setOrderCode(code);
 
-        // Simpan Data Transaksi Sukses ke LocalStorage (toko_orders)
+        // Arsipkan data pesanan ke localStorage
         const orderData = {
             invoiceId: code,
             date: new Date().toISOString(),
@@ -96,19 +95,15 @@ export default function Checkout() {
             console.error("Gagal mengarsipkan transaksi ke localStorage:", error);
         }
 
-        // Kosongkan keranjang & ubah status ke sukses
         clearCart();
         setIsOrderSuccess(true);
     };
 
-    // ==========================================
-    // KONDISI 3: PESANAN BERHASIL (ORDER SUCCESS)
-    // ==========================================
+    // Tampilan pesanan berhasil (order success)
     if (isOrderSuccess) {
         return (
             <div className="py-12">
                 <div className="bg-white border border-slate-200 p-8 sm:p-12 text-center max-w-lg mx-auto rounded-none shadow-sm">
-                    {/* Ikon Centang SVG Hijau */}
                     <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-none flex items-center justify-center mx-auto mb-5 border border-emerald-200">
                         <svg
                             className="w-8 h-8 text-emerald-600"
@@ -155,14 +150,11 @@ export default function Checkout() {
         );
     }
 
-    // ==========================================
-    // KONDISI 1: KERANJANG KOSONG (EMPTY GUARD)
-    // ==========================================
+    // Tampilan ketika keranjang masih kosong
     if (!cart || cart.length === 0) {
         return (
             <div className="py-12">
                 <div className="bg-white border border-slate-200 p-10 sm:p-12 text-center max-w-lg mx-auto rounded-none shadow-sm">
-                    {/* Ikon Keranjang Kosong SVG */}
                     <div className="w-20 h-20 bg-slate-50 border border-slate-200 flex items-center justify-center rounded-none text-slate-400 mx-auto mb-5">
                         <svg
                             className="w-10 h-10"
@@ -206,12 +198,10 @@ export default function Checkout() {
         );
     }
 
-    // ==========================================
-    // KONDISI 2: FORMULIR CHECKOUT (2 KOLOM)
-    // ==========================================
+    // Formulir checkout
     return (
         <div className="py-4 sm:py-6">
-            {/* Header Halaman */}
+            {/* Header halaman */}
             <div className="pb-6 mb-6 border-b border-slate-200">
                 <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
                     Checkout Pembayaran
@@ -221,7 +211,7 @@ export default function Checkout() {
                 </p>
             </div>
 
-            {/* Pesan Error Validasi */}
+            {/* Pesan error validasi */}
             {errorMsg && (
                 <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-sm rounded-none flex items-center gap-2.5">
                     <svg className="w-5 h-5 shrink-0 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
@@ -233,11 +223,11 @@ export default function Checkout() {
 
             <form onSubmit={handleSubmitOrder}>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                    {/* KOLOM KIRI: DATA PEMBELI, PENGIRIMAN & PEMBAYARAN */}
+                    {/* Kolom data pembeli, opsi pengiriman, dan pembayaran */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* BAGIAN A: INFORMASI PENGIRIMAN */}
+                        {/* 1. Informasi pengiriman */}
                         <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
-                            <div className="flex items-center gap-2.5 pb-4 mb-5 border-b border-slate-100">
+                            <div className="flex items-center gap-2.5 pb-4 mb-5 border-slate-100 border-b">
                                 <div className="w-8 h-8 bg-indigo-50 text-[#4F46E5] flex items-center justify-center rounded-none border border-indigo-100">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                                         <path
@@ -327,9 +317,9 @@ export default function Checkout() {
                             </div>
                         </div>
 
-                        {/* BAGIAN B: PILIHAN KURIR / OPSI PENGIRIMAN */}
+                        {/* 2. Opsi pengiriman */}
                         <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
-                            <div className="flex items-center gap-2.5 pb-4 mb-4 border-b border-slate-100">
+                            <div className="flex items-center gap-2.5 pb-4 mb-4 border-slate-100 border-b">
                                 <div className="w-8 h-8 bg-indigo-50 text-[#4F46E5] flex items-center justify-center rounded-none border border-indigo-100">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -399,9 +389,9 @@ export default function Checkout() {
                             </div>
                         </div>
 
-                        {/* BAGIAN C: METODE PEMBAYARAN */}
+                        {/* 3. Metode pembayaran */}
                         <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm">
-                            <div className="flex items-center gap-2.5 pb-4 mb-4 border-b border-slate-100">
+                            <div className="flex items-center gap-2.5 pb-4 mb-4 border-slate-100 border-b">
                                 <div className="w-8 h-8 bg-indigo-50 text-[#4F46E5] flex items-center justify-center rounded-none border border-indigo-100">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                                         <path
@@ -417,7 +407,6 @@ export default function Checkout() {
                             </div>
 
                             <div className="space-y-3">
-                                {/* Opsi 1: QRIS */}
                                 <label
                                     onClick={() => setPaymentMethod("qris")}
                                     className={`p-4 border rounded-none cursor-pointer flex items-center justify-between transition ${
@@ -444,7 +433,6 @@ export default function Checkout() {
                                     </span>
                                 </label>
 
-                                {/* Opsi 2: Transfer Bank */}
                                 <label
                                     onClick={() => setPaymentMethod("bank")}
                                     className={`p-4 border rounded-none cursor-pointer flex items-center justify-between transition ${
@@ -471,7 +459,6 @@ export default function Checkout() {
                                     </span>
                                 </label>
 
-                                {/* Opsi 3: COD */}
                                 <label
                                     onClick={() => setPaymentMethod("cod")}
                                     className={`p-4 border rounded-none cursor-pointer flex items-center justify-between transition ${
@@ -501,14 +488,13 @@ export default function Checkout() {
                         </div>
                     </div>
 
-                    {/* KOLOM KANAN: RINGKASAN PESANAN STICKY */}
+                    {/* Ringkasan pesanan */}
                     <div className="lg:col-span-1">
                         <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm lg:sticky lg:top-24">
                             <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
                                 Ringkasan Pesanan ({totalQty} Produk)
                             </h2>
 
-                            {/* Daftar Ringkas Produk */}
                             <div className="max-h-60 overflow-y-auto divide-y divide-slate-100 my-3 pr-1">
                                 {cart.map((item) => (
                                     <div key={item.id} className="py-2.5 flex items-center gap-3">
@@ -534,7 +520,6 @@ export default function Checkout() {
                                 ))}
                             </div>
 
-                            {/* Rincian Biaya */}
                             <div className="border-t border-slate-100 pt-3 space-y-2.5 text-xs text-slate-600">
                                 <div className="flex justify-between items-center">
                                     <span>Subtotal Produk</span>
@@ -558,7 +543,6 @@ export default function Checkout() {
                                 </div>
                             </div>
 
-                            {/* Total Akhir */}
                             <div className="border-t border-slate-200 pt-4 mt-4 mb-5">
                                 <div className="flex justify-between items-baseline">
                                     <span className="text-sm font-bold text-slate-900">Total Pembayaran</span>
@@ -571,7 +555,6 @@ export default function Checkout() {
                                 </p>
                             </div>
 
-                            {/* Tombol Submit Pembayaran */}
                             <button
                                 type="submit"
                                 className="bg-[#4F46E5] text-white py-3.5 w-full font-bold hover:bg-indigo-700 active:bg-indigo-800 transition flex items-center justify-center gap-2 rounded-none shadow-sm cursor-pointer text-sm"
