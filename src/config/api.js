@@ -1,10 +1,10 @@
 /**
  * Konfigurasi Base URL API TokoSaya
  * Menggunakan environment variable VITE_API_URL jika tersedia,
- * atau default ke live backend hosting: http://api.sumestawsome.xyz
+ * atau default ke live backend hosting: https://api.sumestawsome.xyz
  */
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://api.sumestawsome.xyz";
+  import.meta.env.VITE_API_URL || "https://api.sumestawsome.xyz";
 
 /**
  * Normalisasi URL gambar dari backend Laravel:

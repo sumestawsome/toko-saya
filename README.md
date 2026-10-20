@@ -57,7 +57,7 @@ Pastikan Anda sudah menyiapkan Node.js, PHP, dan Composer di komputer Anda (misa
    ```bash
    php artisan serve
    ```
-   *Backend lokal berjalan di: `http://localhost:8000` (atau gunakan live API: `http://api.sumestawsome.xyz`)*
+   *Backend lokal berjalan di: `http://localhost:8000` (atau gunakan live API: `https://api.sumestawsome.xyz`)*
 
 ### 2. Menyalakan Frontend (React + Vite)
 1. Buka terminal baru dan masuk ke folder proyek frontend TokoSaya:
