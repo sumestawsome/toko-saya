@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCart } from "../../utils/CartContext";
 import BrandLoader from "../../components/BrandLoader";
+import { API_BASE_URL, formatImageUrl } from "../../config/api";
 
 // Data ulasan awal / default jika belum ada ulasan di memori browser
 const initialReviews = [
@@ -48,7 +49,7 @@ export default function ProductDetail() {
   useEffect(() => {
     let isMounted = true;
 
-    fetch("http://localhost:8000/api/products")
+    fetch(`${API_BASE_URL}/api/products`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Gagal mengambil data dari server");
@@ -82,7 +83,7 @@ export default function ProductDetail() {
               : "4,5",
             sold: `${found.sold_count || 0} Terjual`,
             seller: found.seller || "TokoSeller.com",
-            img: found.image_url,
+            img: formatImageUrl(found.image_url),
             desc: found.description,
             description: found.description,
           };

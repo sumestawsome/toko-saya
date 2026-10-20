@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../utils/AuthContext";
 import BrandLoader from "../../components/BrandLoader";
+import { API_BASE_URL, formatImageUrl } from "../../config/api";
 
 // Daftar kategori acuan sesuai relasi tabel categories di basis data backend Laravel
 const DEFAULT_CATEGORIES = [
@@ -73,11 +74,7 @@ export default function AdminDashboard() {
 
   // Helper URL gambar dengan fallback aman
   const getProductImage = (item) => {
-    return (
-      item?.image_url ||
-      item?.img ||
-      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80"
-    );
+    return formatImageUrl(item?.image_url || item?.img);
   };
 
   // Helper format mata uang Rupiah
@@ -93,7 +90,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     let isMounted = true;
 
-    fetch("http://localhost:8000/api/products", {
+    fetch(`${API_BASE_URL}/api/products`, {
       cache: "no-store",
       headers: {
         Accept: "application/json",
@@ -311,7 +308,7 @@ export default function AdminDashboard() {
           fd.append("description", formData.description.trim());
           fd.append("img", imageFile);
 
-          res = await fetch("http://localhost:8000/api/products", {
+          res = await fetch(`${API_BASE_URL}/api/products`, {
             method: "POST",
             headers: {
               Accept: "application/json",
@@ -332,7 +329,7 @@ export default function AdminDashboard() {
               "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80",
           };
 
-          res = await fetch("http://localhost:8000/api/products", {
+          res = await fetch(`${API_BASE_URL}/api/products`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -377,7 +374,7 @@ export default function AdminDashboard() {
           fd.append("img", imageFile);
 
           res = await fetch(
-            `http://localhost:8000/api/products/${currentProductId}`,
+            `${API_BASE_URL}/api/products/${currentProductId}`,
             {
               method: "POST",
               headers: {
@@ -399,7 +396,7 @@ export default function AdminDashboard() {
           };
 
           res = await fetch(
-            `http://localhost:8000/api/products/${currentProductId}`,
+            `${API_BASE_URL}/api/products/${currentProductId}`,
             {
               method: "PUT",
               headers: {
@@ -468,7 +465,7 @@ export default function AdminDashboard() {
 
     try {
       const res = await fetch(
-        `http://localhost:8000/api/products/${deletingProduct.id}`,
+        `${API_BASE_URL}/api/products/${deletingProduct.id}`,
         {
           method: "DELETE",
           headers,
@@ -998,7 +995,7 @@ export default function AdminDashboard() {
           <p className="text-xs text-slate-500 mt-0.5">
             Endpoint sinkronisasi aktif:{" "}
             <code className="text-[#4F46E5] font-mono">
-              http://127.0.0.1:8000/api/products
+              {API_BASE_URL}/api/products
             </code>
           </p>
         </div>

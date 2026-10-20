@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import ProductCard from "../../components/ProductCard";
 import ProductFilterBar from "../../components/ProductFilterBar";
 import BrandLoader from "../../components/BrandLoader";
+import { API_BASE_URL, formatImageUrl } from "../../config/api";
 // import products from "../../data/products.json"; ini kalau ngambil data bukan dari laravel tapi dari folder data
 
 export default function Dashboard() {
@@ -17,7 +18,7 @@ export default function Dashboard() {
 
   // Ambil data dari REST API Laravel saat halaman dibuka
   useEffect(() => {
-    fetch("http://localhost:8000/api/products")
+    fetch(`${API_BASE_URL}/api/products`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Gagal mengambil data dari server");
@@ -40,7 +41,7 @@ export default function Dashboard() {
           rating: item.rating ? String(item.rating).replace(".", ",") : "4,5",
           sold: `${item.sold_count || 0} Terjual`,
           seller: item.seller || "TokoSeller.com",
-          img: item.image_url,
+          img: formatImageUrl(item.image_url),
           desc: item.description,
           description: item.description,
         }));

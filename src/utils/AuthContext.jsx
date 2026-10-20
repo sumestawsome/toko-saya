@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { API_BASE_URL } from "../config/api";
 
 const AuthContext = createContext();
 
@@ -19,7 +20,7 @@ export function AuthProvider({ children }) {
     const cleanPassword = (password || "").trim();
 
     try {
-      const res = await fetch("http://localhost:8000/api/login", {
+      const res = await fetch(`${API_BASE_URL}/api/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,7 +72,7 @@ export function AuthProvider({ children }) {
       return {
         success: false,
         message:
-          "Tidak dapat menghubungi server. Pastikan 'php artisan serve' sedang aktif.",
+          `Tidak dapat menghubungi server API (${API_BASE_URL}). Pastikan server backend sedang aktif.`,
       };
     }
   };
@@ -81,7 +82,7 @@ export function AuthProvider({ children }) {
     // Hapus token di backend jika ada koneksi
     if (user?.token) {
       try {
-        await fetch("http://localhost:8000/api/logout", {
+        await fetch(`${API_BASE_URL}/api/logout`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${user.token}`,
