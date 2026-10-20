@@ -22,3 +22,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Testing & Subagent Artifacts
+.playwright-mcp/
+
+# Dokumen Analisis & Draf Laporan
+PROJECT_ANALYSIS.md
+laporan.jsx
+draft-laporan.md
+draft_laporan.md
+public/images/laporan/
+
