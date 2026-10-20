@@ -94,6 +94,7 @@ export default function AdminDashboard() {
     let isMounted = true;
 
     fetch("http://localhost:8000/api/products", {
+      cache: "no-store",
       headers: {
         Accept: "application/json",
         ...(user?.token ? { Authorization: `Bearer ${user.token}` } : {}),
@@ -412,6 +413,16 @@ export default function AdminDashboard() {
         }
 
         if (!res.ok) {
+          if (res.status === 404) {
+            showToast(
+              "Produk tidak ditemukan di database server (ID mungkin sudah terhapus). Memuat ulang katalog...",
+              "error",
+            );
+            setIsModalOpen(false);
+            setReloadTrigger((prev) => prev + 1);
+            return;
+          }
+
           const errData = await res.json().catch(() => null);
           const msg =
             errData?.message ||
@@ -464,7 +475,18 @@ export default function AdminDashboard() {
         },
       );
 
-      if (!res.ok && res.status !== 404) {
+      if (!res.ok) {
+        if (res.status === 404) {
+          showToast(
+            "Produk sudah tidak ada di database server. Memperbarui daftar...",
+            "error",
+          );
+          setProducts((prev) => prev.filter((p) => p.id !== deletingProduct.id));
+          setReloadTrigger((prev) => prev + 1);
+          setDeletingProduct(null);
+          return;
+        }
+
         const errData = await res.json().catch(() => null);
         throw new Error(
           errData?.message || `Gagal menghapus produk (Status: ${res.status})`,
@@ -760,6 +782,32 @@ export default function AdminDashboard() {
                 </option>
               ))}
             </select>
+
+            {/* Tombol Segarkan Data */}
+            <button
+              type="button"
+              onClick={() => {
+                setReloadTrigger((prev) => prev + 1);
+                showToast("Memperbarui data katalog dari database...", "info");
+              }}
+              className="p-2 border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 rounded-none transition cursor-pointer shrink-0"
+              title="Segarkan data katalog dari server"
+              aria-label="Segarkan data katalog"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
+                />
+              </svg>
+            </button>
           </div>
         </div>
 
