@@ -26,10 +26,12 @@ dist-ssr
 # Testing & Subagent Artifacts
 .playwright-mcp/
 
-# Dokumen Analisis & Draf Laporan
+# Dokumen Analisis & Draf Laporan Internal
+docs/
 PROJECT_ANALYSIS.md
+PROJECT_ANALYSIS_ARSIP.md
+AUDIT_MODUL_BAB_III_DAN_IV.md
 laporan.jsx
 draft-laporan.md
 draft_laporan.md
 public/images/laporan/
-

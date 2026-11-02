@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
     }
   });
 
-  // Fungsi Login yang langsung bertanya ke server Laravel
+  // Fungsi Login yang langsung menembak API backend Laravel Sanctum
   const login = async (email, password) => {
     const cleanEmail = (email || "").trim().toLowerCase();
     const cleanPassword = (password || "").trim();
@@ -34,58 +34,53 @@ export function AuthProvider({ children }) {
 
       const data = await res.json();
 
-      // Jika email & password cocok di database Laravel
+      // Jika berhasil login dan server mengembalikan token Sanctum
       if (res.ok && data.token) {
         const userData = {
+          id: data.user?.id || 1,
           email: cleanEmail,
           role: "admin",
           name: data.user?.name || "Administrator",
-          token: data.token, // Menyimpan tiket token Sanctum
+          token: data.token,
         };
 
         setUser(userData);
+        // Simpan token langsung ke localStorage sesuai standar API Client
+        localStorage.setItem("token", data.token);
         localStorage.setItem("toko_user", JSON.stringify(userData));
-        return { success: true, user: userData };
+
+        return { success: true, user: userData, token: data.token };
       }
 
-      // Jika server menolak (misal password salah)
+      // Jika server mengembalikan pesan error (422 / 401)
       return {
         success: false,
         message:
-          data.message || "Email atau kata sandi tidak cocok di database.",
+          data.message ||
+          data.errors?.email?.[0] ||
+          "Email atau kata sandi tidak cocok di database.",
       };
     } catch (error) {
       console.error("Gagal terhubung ke server login:", error);
 
-      // Jalur darurat lokal (jika sewaktu-waktu server Laravel belum dinyalakan)
-      if (cleanEmail === "admin@gmail.com" && cleanPassword === "admin12345") {
-        const fallbackUser = {
-          email: "admin@gmail.com",
-          role: "admin",
-          name: "Administrator (Mode Offline)",
-        };
-        setUser(fallbackUser);
-        localStorage.setItem("toko_user", JSON.stringify(fallbackUser));
-        return { success: true, user: fallbackUser };
-      }
-
       return {
         success: false,
-        message:
-          `Tidak dapat menghubungi server API (${API_BASE_URL}). Pastikan server backend sedang aktif.`,
+        message: `Tidak dapat menghubungi server API (${API_BASE_URL}). Pastikan server backend Laravel sedang aktif.`,
       };
     }
   };
 
   // Fungsi Logout
   const logout = async () => {
-    // Hapus token di backend jika ada koneksi
-    if (user?.token) {
+    const activeToken = localStorage.getItem("token") || user?.token;
+
+    // Panggil endpoint logout backend jika token tersedia
+    if (activeToken) {
       try {
         await fetch(`${API_BASE_URL}/api/logout`, {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${activeToken}`,
             Accept: "application/json",
           },
         });
@@ -94,16 +89,20 @@ export function AuthProvider({ children }) {
       }
     }
 
+    // Bersihkan seluruh data sesi lokal
     try {
+      localStorage.removeItem("token");
       localStorage.removeItem("toko_user");
+      localStorage.removeItem("toko_auth_user");
     } catch (error) {
       console.error("Gagal menghapus sesi login:", error);
     }
+
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

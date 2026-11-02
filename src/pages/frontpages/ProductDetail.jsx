@@ -4,6 +4,17 @@ import { useCart } from "../../utils/CartContext";
 import BrandLoader from "../../components/BrandLoader";
 import { API_BASE_URL, formatImageUrl } from "../../config/api";
 
+// ============================================================================
+// --- MODE STATIS (BAB II): Menggunakan import JSON lokal & Pencarian Statis ---
+// Pada Modul BAB II, data produk dicari dari array lokal berkas JSON:
+// import staticProducts from "../../data/products_lama.json";
+// const found = staticProducts.find((p) => p.slug === targetParam || String(p.id) === String(targetParam));
+// ============================================================================
+
+// ============================================================================
+// --- MODE DINAMIS (BAB IV): Terintegrasi dengan Laravel API Resource ---
+// ============================================================================
+
 // Data ulasan awal / default jika belum ada ulasan di memori browser
 const initialReviews = [
   {

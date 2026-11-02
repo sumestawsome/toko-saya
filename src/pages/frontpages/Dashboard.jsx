@@ -1,115 +1,103 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import ProductCard from "../../components/ProductCard";
 import ProductFilterBar from "../../components/ProductFilterBar";
 import BrandLoader from "../../components/BrandLoader";
-import { API_BASE_URL, formatImageUrl } from "../../config/api";
-// import products from "../../data/products.json"; ini kalau ngambil data bukan dari laravel tapi dari folder data
+import { formatImageUrl } from "../../config/api";
+
+// ============================================================================
+// --- MODE STATIS (BAB II): Menggunakan import JSON lokal & State Statis ---
+// Pada modul BAB II, seluruh katalog produk dibaca langsung dari berkas statis:
+// import staticProducts from "../../data/products_lama.json";
+// ============================================================================
+
+// ============================================================================
+// --- MODE DINAMIS (BAB IV): Terintegrasi dengan Laravel API via React Query ---
+// ============================================================================
+import { useProducts } from "../../utils/ProductContext";
 
 export default function Dashboard() {
-  // State data produk dari backend Laravel
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // Ambil data produk langsung dari server
+  const { products: rawProducts, isLoading: loading, isError } = useProducts();
 
-  // State filter pencarian, kategori, dan sorting
+  // Filter pencarian, kategori, dan urutan harga
   const [keyword, setKeyword] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Semua");
   const [sortBy, setSortBy] = useState("default");
 
-  // Ambil data dari REST API Laravel saat halaman dibuka
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/api/products`)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Gagal mengambil data dari server");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        // Menyesuaikan struktur data API Laravel ke format yang dipakai ProductCard
-        const items = Array.isArray(data) ? data : data.data || [];
-        const formatted = items.map((item) => ({
-          id: item.id,
-          name: item.name,
-          slug: item.slug,
-          category_name: item.category ? item.category.name : "Umum",
-          price: `Rp${Number(item.price).toLocaleString("id-ID")}`,
-          rawPrice: Number(item.price),
-          original_price: item.original_price
-            ? `Rp${Number(item.original_price).toLocaleString("id-ID")}`
-            : null,
-          rating: item.rating ? String(item.rating).replace(".", ",") : "4,5",
-          sold: `${item.sold_count || 0} Terjual`,
-          seller: item.seller || "TokoSeller.com",
-          img: formatImageUrl(item.image_url),
-          desc: item.description,
-          description: item.description,
-        }));
+  // Sesuaikan format data produk agar pas di kartu produk
+  const products = useMemo(() => {
+    const items = Array.isArray(rawProducts) ? rawProducts : [];
+    return items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      slug: item.slug,
+      category_name: item.category?.name || item.category?.category || "Umum",
+      price: `Rp${Number(item.price).toLocaleString("id-ID")}`,
+      rawPrice: Number(item.price),
+      original_price: item.original_price
+        ? `Rp${Number(item.original_price).toLocaleString("id-ID")}`
+        : null,
+      rating: item.rating ? String(item.rating).replace(".", ",") : "4,5",
+      sold: `${item.sold_count || 0} Terjual`,
+      seller: item.seller || "TokoSeller.com",
+      img: formatImageUrl(item.image_url || item.img_url),
+      desc: item.description,
+      description: item.description,
+    }));
+  }, [rawProducts]);
 
-        setProducts(formatted);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Fetch error:", err);
-        setError("Tidak dapat memuat katalog produk dari database.");
-        setLoading(false);
-      });
-  }, []);
+  // Ambil daftar kategori unik dari data produk aktif
+  const categories = useMemo(() => {
+    return [...new Set(products.map((p) => p.category_name))];
+  }, [products]);
 
-  // Ambil daftar kategori unik dari data produk
-  const categories = [...new Set(products.map((p) => p.category_name))];
+  // Filter produk berdasarkan kategori dan pencarian kata utuh
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) => {
+      const matchCategory =
+        selectedCategory === "Semua" ||
+        product.category_name === selectedCategory;
 
-  // Filter produk berdasarkan kategori dan pencarian perkata
-  const filteredProducts = products.filter((product) => {
-    const matchCategory =
-      selectedCategory === "Semua" ||
-      product.category_name === selectedCategory;
+      let matchKeyword = true;
+      if (keyword.trim() !== "") {
+        const searchWords = keyword
+          .toLowerCase()
+          .trim()
+          .split(/\s+/)
+          .filter(Boolean);
+        matchKeyword = searchWords.every((word) => {
+          const wordRegex = new RegExp(`\\b${word}\\b`, "i");
+          return wordRegex.test(product.name);
+        });
+      }
 
-    let matchKeyword = true;
-    if (keyword.trim() !== "") {
-      const searchWords = keyword
-        .toLowerCase()
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean);
-      matchKeyword = searchWords.every((word) => {
-        const wordRegex = new RegExp(`\\b${word}\\b`, "i");
-        return wordRegex.test(product.name);
-      });
-    }
+      return matchCategory && matchKeyword;
+    });
+  }, [products, selectedCategory, keyword]);
 
-    return matchCategory && matchKeyword;
-  });
-
-  // Pengurutan harga (lama)
-  //   const sortedProducts = [...filteredProducts].sort((a, b) => {
-  //     if (sortBy === "lowest") return a.rawPrice - b.rawPrice;
-  //     if (sortBy === "highest") return b.rawPrice - a.rawPrice;
-  //     return a.id - b.id; // Urutan default berdasarkan ID
-  //   });
-
-  // Pengurutan harga (Laravel)
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === "lowest") return a.rawPrice - b.rawPrice;
-    if (sortBy === "highest") return b.rawPrice - a.rawPrice;
-    return a.id - b.id; // Urutan default berdasarkan ID
-  });
+  // Pengurutan harga
+  const sortedProducts = useMemo(() => {
+    return [...filteredProducts].sort((a, b) => {
+      if (sortBy === "lowest") return a.rawPrice - b.rawPrice;
+      if (sortBy === "highest") return b.rawPrice - a.rawPrice;
+      return a.id - b.id;
+    });
+  }, [filteredProducts, sortBy]);
 
   if (loading) {
     return (
       <div className="py-24 flex justify-center items-center">
-        <BrandLoader text="Memuat katalog dari server database..." />
+        <BrandLoader text="Memuat katalog produk dari database server..." />
       </div>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
-      <div className="max-w-md mx-auto my-12 text-center p-8 bg-red-50 border border-red-200">
-        <h3 className="font-bold text-red-700 text-sm">{error}</h3>
-        <p className="text-red-500 text-xs mt-1">
-          Pastikan server Laravel aktif di terminal (
-          <code>php artisan serve</code>).
+      <div className="max-w-md mx-auto my-12 text-center p-8 bg-red-50 border-2 border-red-500 shadow-[4px_4px_0px_0px_rgba(239,68,68,1)]">
+        <h3 className="font-bold text-red-700 text-sm">Gagal Mengambil Data Produk</h3>
+        <p className="text-red-600 text-xs mt-1">
+          Pastikan backend Laravel sedang berjalan (<code>php artisan serve</code>) dan MySQL aktif di port 3306.
         </p>
       </div>
     );
@@ -137,13 +125,12 @@ export default function Dashboard() {
         </div>
       ) : (
         /* Empty state jika produk tidak ditemukan */
-        <div className="max-w-md mx-auto my-12 text-center p-8 sm:p-10 bg-white border border-slate-200 shadow-sm rounded-none">
-          <h3 className="font-bold text-slate-800 text-base">
+        <div className="max-w-md mx-auto my-12 text-center p-8 sm:p-10 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none">
+          <h3 className="font-black text-stone-900 text-base uppercase">
             Produk Tidak Ditemukan
           </h3>
-          <p className="text-slate-500 text-xs mt-1">
-            Tidak ada produk yang cocok dengan kata kunci atau filter yang Anda
-            pilih.
+          <p className="text-stone-600 text-xs mt-1">
+            Tidak ada produk yang cocok dengan kata kunci atau filter yang Anda pilih.
           </p>
           <button
             onClick={() => {
@@ -151,7 +138,7 @@ export default function Dashboard() {
               setSelectedCategory("Semua");
               setSortBy("default");
             }}
-            className="mt-4 rounded-none bg-[#4F46E5] text-white hover:bg-indigo-700 px-4 py-2 text-xs font-semibold transition cursor-pointer"
+            className="mt-4 rounded-none bg-lime-400 text-black font-black uppercase hover:bg-lime-300 px-4 py-2 text-xs border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 transition cursor-pointer"
           >
             Reset Semua Filter
           </button>

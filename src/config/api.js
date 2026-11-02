@@ -1,16 +1,16 @@
 /**
  * Konfigurasi Base URL API TokoSaya
- * Menggunakan environment variable VITE_API_URL jika tersedia,
- * atau default ke live backend hosting: https://api.sumestawsome.xyz
+ * Default ke backend Laravel lokal http://127.0.0.1:8000 untuk pengujian tugas praktikum,
+ * atau override melalui environment variable VITE_API_URL.
  */
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://api.sumestawsome.xyz";
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 /**
  * Normalisasi URL gambar dari backend Laravel:
- * - Mengalihkan URL gambar lama yang tersimpan dengan localhost/127.0.0.1:8000 ke domain hosting
+ * - Menangani URL localhost/127.0.0.1:8000
  * - Menangani path relatif seperti /storage/products/...
- * - Memberikan placeholder berkualitas tinggi jika URL kosong/null
+ * - Memberikan placeholder jika URL kosong/null
  */
 export function formatImageUrl(url) {
   if (!url || typeof url !== "string") {
@@ -19,19 +19,13 @@ export function formatImageUrl(url) {
 
   const trimmed = url.trim();
 
-  // Arahkan domain localhost / 127.0.0.1:8000 ke API_BASE_URL hosting live
-  if (
-    trimmed.startsWith("http://localhost:8000") ||
-    trimmed.startsWith("http://127.0.0.1:8000")
-  ) {
-    return trimmed
-      .replace("http://localhost:8000", API_BASE_URL)
-      .replace("http://127.0.0.1:8000", API_BASE_URL);
-  }
-
   // Tangani path relatif storage publik Laravel
   if (trimmed.startsWith("/storage/")) {
     return `${API_BASE_URL}${trimmed}`;
+  }
+
+  if (trimmed.startsWith("storage/")) {
+    return `${API_BASE_URL}/${trimmed}`;
   }
 
   return trimmed;

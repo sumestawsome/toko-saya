@@ -89,4 +89,4 @@ Untuk mencoba fitur pengelolaan produk di halaman Admin Dashboard (`/admin/dashb
 ## 👨‍💻 Pembuat
 
 Dikembangkan oleh **[sumestawsome](https://github.com/sumestawsome)**  
-Kunjungi portofolio: [sumestawsome.pages.dev](https://sumestawsome.pages.dev)
+Kunjungi portofolio: [sumestawsome.xyz](https://sumestawsome.xyz)

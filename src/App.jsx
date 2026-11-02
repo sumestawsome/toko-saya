@@ -7,6 +7,8 @@ import ProductDetail from "./pages/frontpages/ProductDetail";
 import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/adminpages/AdminDashboard";
 import AboutPage from "./pages/adminpages/AboutPage";
+import ProductForm from "./pages/adminpages/ProductForm";
+import ProductEdit from "./pages/adminpages/ProductEdit";
 import LoginPage from "./pages/LoginPage";
 import LogoutPage from "./pages/LogoutPage";
 
@@ -30,11 +32,13 @@ export default function App() {
         <Route path="checkout" element={<Checkout />} />
       </Route>
 
-      {/* Rute Modul Admin (Backpage) */}
+      {/* Rute Modul Admin (Backpage - Modul BAB IV) */}
       <Route path="/admin" element={<AdminLayout />}>
         <Route index element={<AdminDashboard />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="about" element={<AboutPage />} />
+        <Route path="add-product" element={<ProductForm />} />
+        <Route path="edit-product/:id" element={<ProductEdit />} />
       </Route>
     </Routes>
   );
