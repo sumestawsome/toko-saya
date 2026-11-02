@@ -1,7 +1,18 @@
 import axios from "axios";
 
+// ============================================================================
+// PILIHAN KONEKSI API BACKEND:
+// 1. Mode Hosting / Production (Aktif):
+//    baseURL: "https://api.sumestawsome.xyz/api"
+// 2. Mode Komputer Lokal / Laragon (Gunakan jika sedang uji coba di laptop):
+//    baseURL: "http://127.0.0.1:8000/api"
+// ============================================================================
+const API_URL = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : "https://api.sumestawsome.xyz/api";
+
 const apiClient = axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

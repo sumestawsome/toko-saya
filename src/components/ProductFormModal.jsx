@@ -342,7 +342,7 @@ export default function ProductFormModal({
                   <img
                     src={newImagePreview}
                     alt="Pratinjau Baru"
-                    className="w-16 h-16 object-cover border-2 border-[#4F46E5] bg-white shadow-xs"
+                    className="w-16 h-16 object-cover border border-indigo-500 ring-2 ring-indigo-100 bg-white shadow-xs"
                   />
                 </div>
               )}

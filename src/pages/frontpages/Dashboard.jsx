@@ -94,10 +94,10 @@ export default function Dashboard() {
 
   if (isError) {
     return (
-      <div className="max-w-md mx-auto my-12 text-center p-8 bg-red-50 border-2 border-red-500 shadow-[4px_4px_0px_0px_rgba(239,68,68,1)]">
-        <h3 className="font-bold text-red-700 text-sm">Gagal Mengambil Data Produk</h3>
-        <p className="text-red-600 text-xs mt-1">
-          Pastikan backend Laravel sedang berjalan (<code>php artisan serve</code>) dan MySQL aktif di port 3306.
+      <div className="max-w-md mx-auto my-12 text-center p-8 bg-rose-50/60 border border-rose-200 shadow-sm rounded-none">
+        <h3 className="font-bold text-rose-700 text-sm">Gagal Mengambil Data Produk</h3>
+        <p className="text-rose-600/90 text-xs mt-1">
+          Tidak dapat terhubung ke server backend API. Pastikan server aktif dan dapat diakses.
         </p>
       </div>
     );
@@ -125,11 +125,11 @@ export default function Dashboard() {
         </div>
       ) : (
         /* Empty state jika produk tidak ditemukan */
-        <div className="max-w-md mx-auto my-12 text-center p-8 sm:p-10 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rounded-none">
-          <h3 className="font-black text-stone-900 text-base uppercase">
+        <div className="max-w-md mx-auto my-12 text-center p-8 sm:p-10 bg-white border border-slate-200 shadow-sm rounded-none">
+          <h3 className="font-bold text-slate-800 text-base">
             Produk Tidak Ditemukan
           </h3>
-          <p className="text-stone-600 text-xs mt-1">
+          <p className="text-slate-500 text-xs mt-1">
             Tidak ada produk yang cocok dengan kata kunci atau filter yang Anda pilih.
           </p>
           <button
@@ -138,7 +138,7 @@ export default function Dashboard() {
               setSelectedCategory("Semua");
               setSortBy("default");
             }}
-            className="mt-4 rounded-none bg-lime-400 text-black font-black uppercase hover:bg-lime-300 px-4 py-2 text-xs border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-x-0.5 active:translate-y-0.5 transition cursor-pointer"
+            className="mt-4 rounded-none bg-[#4F46E5] text-white hover:bg-indigo-700 px-4 py-2 text-xs font-semibold shadow-sm transition cursor-pointer"
           >
             Reset Semua Filter
           </button>
