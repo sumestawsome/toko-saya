@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useProducts } from "../../utils/ProductContext";
 import { useAuth } from "../../utils/AuthContext";
-import { formatImageUrl } from "../../config/api";
+import { formatImageUrl, PLACEHOLDER_IMAGE } from "../../config/api";
 import BrandLoader from "../../components/BrandLoader";
 import ProductFormModal from "../../components/ProductFormModal";
 import toast from "react-hot-toast";
@@ -332,8 +332,9 @@ export default function AdminDashboard() {
                           alt={item.name}
                           className="w-12 h-12 object-cover border border-slate-200 mx-auto rounded-none bg-slate-100"
                           onError={(e) => {
-                            e.target.src =
-                              "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80";
+                            if (e.target.src !== PLACEHOLDER_IMAGE) {
+                              e.target.src = PLACEHOLDER_IMAGE;
+                            }
                           }}
                         />
                       </td>

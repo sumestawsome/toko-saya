@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../utils/CartContext";
+import { PLACEHOLDER_IMAGE } from "../config/api";
 
 export default function ProductCard({ p }) {
     const { addToCart } = useCart();
@@ -15,9 +16,14 @@ export default function ProductCard({ p }) {
                 {/* Wadah Gambar: Rasio persegi, background #cbe3f7, sudut kotak tegas */}
                 <div className="w-full aspect-square bg-[#cbe3f7] rounded-none overflow-hidden flex items-center justify-center">
                     <img
-                        src={p.img || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80"}
+                        src={p.img || PLACEHOLDER_IMAGE}
                         alt={p.name}
                         className="w-full h-full object-cover rounded-none"
+                        onError={(e) => {
+                            if (e.target.src !== PLACEHOLDER_IMAGE) {
+                                e.target.src = PLACEHOLDER_IMAGE;
+                            }
+                        }}
                     />
                 </div>
 

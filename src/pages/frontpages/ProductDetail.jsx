@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCart } from "../../utils/CartContext";
 import BrandLoader from "../../components/BrandLoader";
-import { API_BASE_URL, formatImageUrl } from "../../config/api";
+import { API_BASE_URL, formatImageUrl, PLACEHOLDER_IMAGE } from "../../config/api";
 
 // ============================================================================
 // --- MODE STATIS (BAB II): Menggunakan import JSON lokal & Pencarian Statis ---
@@ -258,12 +258,14 @@ export default function ProductDetail() {
         <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm space-y-4">
           <div className="w-full aspect-square bg-[#cbe3f7] rounded-none overflow-hidden flex items-center justify-center border border-slate-200">
             <img
-              src={
-                product.img ||
-                "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80"
-              }
+              src={product.img || PLACEHOLDER_IMAGE}
               alt={product.name}
               className="w-full h-full object-cover rounded-none"
+              onError={(e) => {
+                if (e.target.src !== PLACEHOLDER_IMAGE) {
+                  e.target.src = PLACEHOLDER_IMAGE;
+                }
+              }}
             />
           </div>
           <div className="flex items-center justify-between pt-2">

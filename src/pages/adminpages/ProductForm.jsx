@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useProducts } from "../../utils/ProductContext";
 import { useQuery } from "@tanstack/react-query";
+import { PLACEHOLDER_IMAGE } from "../../config/api";
 import toast from "react-hot-toast";
 
 export default function ProductForm() {
@@ -23,29 +24,47 @@ export default function ProductForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
 
+  // Opsi input foto: "url" (default) atau "file"
+  const [imageInputMode, setImageInputMode] = useState("url");
+  const [imageUrlInput, setImageUrlInput] = useState("");
+
   // Ambil daftar kategori secara dinamis dari API backend via React Query
   const { data: categories = [], isLoading: loadingCategories } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategories,
   });
 
-  // Handler perubahan nilai input
+  // Handler perubahan nilai input teks biasa
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (files) {
-      const file = files[0];
-      setFormData((prev) => ({ ...prev, [name]: file }));
-      if (file) {
-        setPreviewUrl(URL.createObjectURL(file));
-      } else {
-        setPreviewUrl(null);
-      }
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));
+    }
+  };
+
+  // Handler input teks link URL gambar
+  const handleImageUrlChange = (e) => {
+    const val = e.target.value;
+    setImageUrlInput(val);
+    if (errors.img || errors.image_url || errors.img_url) {
+      setErrors((prev) => ({ ...prev, img: null, image_url: null, img_url: null }));
+    }
+  };
+
+  // Handler input berkas file gambar
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData((prev) => ({ ...prev, img: file }));
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setFormData((prev) => ({ ...prev, img: null }));
+      setPreviewUrl(null);
+    }
+    if (errors.img) {
+      setErrors((prev) => ({ ...prev, img: null }));
     }
   };
 
@@ -57,10 +76,23 @@ export default function ProductForm() {
 
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      if (value !== null && value !== "") {
+      if (key !== "img" && value !== null && value !== "") {
         data.append(key, value);
       }
     });
+
+    if (imageInputMode === "file") {
+      if (formData.img instanceof File) {
+        data.append("img", formData.img);
+      }
+    } else {
+      const cleanUrl = imageUrlInput.trim();
+      if (cleanUrl) {
+        data.append("img", cleanUrl);
+        data.append("img_url", cleanUrl);
+        data.append("image_url", cleanUrl);
+      }
+    }
 
     try {
       await addProduct(data);
@@ -245,35 +277,100 @@ export default function ProductForm() {
           )}
         </div>
 
-        {/* 5. Upload Berkas Foto */}
+        {/* 5. Foto Produk (Dukungan URL Link & Upload File) */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-            Foto Produk (JPG, PNG, WebP • Maks. 2MB)
-          </label>
-          <div className="p-3 bg-slate-50 border border-slate-200">
-            <input
-              type="file"
-              name="img"
-              accept="image/*"
-              onChange={handleChange}
-              className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:border file:border-slate-300 file:text-xs file:font-semibold file:bg-white file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"
-            />
-            {previewUrl && (
-              <div className="mt-3">
-                <span className="block text-[10px] font-medium text-slate-400 mb-1">
-                  Pratinjau Foto Pilihan:
-                </span>
-                <img
-                  src={previewUrl}
-                  alt="Preview"
-                  className="w-20 h-20 object-cover border border-slate-300 bg-white"
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-semibold text-slate-700">
+              Foto Produk <span className="text-slate-400 font-normal">(Pilih salah satu cara)</span>
+            </label>
+
+            <div className="flex items-center gap-1 bg-slate-100 p-0.5 border border-slate-200">
+              <button
+                type="button"
+                onClick={() => {
+                  setImageInputMode("url");
+                  setFormData((prev) => ({ ...prev, img: null }));
+                }}
+                className={`px-2.5 py-1 text-[11px] font-semibold transition cursor-pointer rounded-none ${
+                  imageInputMode === "url"
+                    ? "bg-white text-indigo-700 shadow-xs border border-slate-200"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                🔗 Link URL (Web/Unsplash)
+              </button>
+              <button
+                type="button"
+                onClick={() => setImageInputMode("file")}
+                className={`px-2.5 py-1 text-[11px] font-semibold transition cursor-pointer rounded-none ${
+                  imageInputMode === "file"
+                    ? "bg-white text-indigo-700 shadow-xs border border-slate-200"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                📁 Unggah File (Laptop)
+              </button>
+            </div>
+          </div>
+
+          <div className="p-3 bg-slate-50 border border-slate-200 space-y-3">
+            {imageInputMode === "url" ? (
+              <div>
+                <input
+                  type="url"
+                  value={imageUrlInput}
+                  onChange={handleImageUrlChange}
+                  placeholder="Tempel tautan URL gambar (misal: https://images.unsplash.com/...)"
+                  className="w-full bg-white border border-slate-300 focus:border-[#4F46E5] rounded-none px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none transition"
                 />
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Bisa langsung tempel link foto dari Unsplash atau sumber publik internet lainnya.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <input
+                  type="file"
+                  name="img"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:border file:border-slate-300 file:text-xs file:font-semibold file:bg-white file:text-slate-700 hover:file:bg-slate-100 cursor-pointer"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">
+                  Pilih berkas JPG, PNG, atau WebP dari laptop (Maks. 2MB).
+                </p>
+              </div>
+            )}
+
+            {/* Kotak Pratinjau Gambar Langsung */}
+            {(imageInputMode === "url" ? imageUrlInput.trim() : previewUrl) && (
+              <div className="pt-2 border-t border-slate-200 flex items-center gap-3">
+                <div className="shrink-0 text-center">
+                  <img
+                    src={imageInputMode === "url" ? imageUrlInput.trim() : previewUrl}
+                    alt="Pratinjau Foto"
+                    className="w-16 h-16 object-cover border border-indigo-500 ring-2 ring-indigo-100 bg-white shadow-xs"
+                    onError={(e) => {
+                      if (e.target.src !== PLACEHOLDER_IMAGE) {
+                        e.target.src = PLACEHOLDER_IMAGE;
+                      }
+                    }}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="block text-[11px] font-semibold text-slate-800">
+                    {imageInputMode === "url" ? "Pratinjau Link URL Baru" : "Pratinjau File Pilihan"}
+                  </span>
+                  <p className="text-[10px] text-slate-500 truncate mt-0.5">
+                    {imageInputMode === "url" ? imageUrlInput.trim() : "Berkas lokal terpilih"}
+                  </p>
+                </div>
               </div>
             )}
           </div>
-          {errors.img && (
+          {(errors.img || errors.image_url) && (
             <p className="text-rose-600 text-[11px] font-medium mt-1">
-              {errors.img[0]}
+              {errors.img?.[0] || errors.image_url?.[0]}
             </p>
           )}
         </div>
