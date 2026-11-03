@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import BrandLogo from "./BrandLogo";
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
     const location = useLocation();
@@ -29,9 +30,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
                 {/* Brand Header */}
                 <div className="p-5 border-b border-slate-200 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-[#4F46E5] text-white flex items-center justify-center font-black text-lg rounded-none shadow-sm">
-                            A
-                        </div>
+                        <BrandLogo variant="indigo" size={36} className="shadow-xs border border-slate-200" />
                         <div>
                             <span className="text-base font-bold text-slate-900 tracking-tight block">
                                 TokoSaya Admin

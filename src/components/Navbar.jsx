@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../utils/CartContext";
 import { useAuth } from "../utils/AuthContext";
+import BrandLogo from "./BrandLogo";
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -57,11 +58,9 @@ export default function Navbar() {
                 <Link
                     to="/"
                     onClick={closeMobileMenu}
-                    className="text-xl font-bold tracking-tight text-white flex items-center gap-2 hover:opacity-95 transition"
+                    className="text-xl font-bold tracking-tight text-white flex items-center gap-2.5 hover:opacity-95 transition"
                 >
-                    <span className="bg-white text-[#4F46E5] w-8 h-8 rounded-none flex items-center justify-center font-black text-base shadow-sm">
-                        T
-                    </span>
+                    <BrandLogo variant="white" size={32} className="shadow-sm" />
                     <span>TokoSaya</span>
                 </Link>
 

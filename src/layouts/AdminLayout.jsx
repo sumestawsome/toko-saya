@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Outlet, Navigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import BrandLogo from "../components/BrandLogo";
 import { useAuth } from "../utils/AuthContext";
 
 export default function AdminLayout() {
@@ -31,9 +32,7 @@ export default function AdminLayout() {
                 {/* Topbar Mobile (Hanya tampil di bawah breakpoint md) */}
                 <header className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 bg-[#4F46E5] text-white flex items-center justify-center font-bold text-sm rounded-none">
-                            A
-                        </div>
+                        <BrandLogo variant="indigo" size={28} className="shadow-xs border border-slate-200" />
                         <h1 className="font-bold text-slate-900 text-base">
                             Admin Panel
                         </h1>

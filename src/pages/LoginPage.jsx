@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../utils/AuthContext";
+import BrandLogo from "../components/BrandLogo";
 
 export default function LoginPage() {
   const { user, login } = useAuth();
@@ -40,9 +41,7 @@ export default function LoginPage() {
       <div className="max-w-sm w-full mx-auto p-8 bg-white border border-slate-200 shadow-sm rounded-none">
         {/* Header Logo & Judul */}
         <div className="text-center mb-6">
-          <div className="w-10 h-10 bg-[#4F46E5] text-white flex items-center justify-center font-black text-xl rounded-none mx-auto mb-3 shadow-xs">
-            A
-          </div>
+          <BrandLogo variant="indigo" size={48} className="mx-auto mb-3 shadow-xs border border-slate-200" />
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
             Masuk Akun Admin
           </h1>
